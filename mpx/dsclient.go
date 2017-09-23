@@ -21,6 +21,7 @@ import (
 
 type DSClient interface {
 	GetJSON(path string, params url.Values, ids []string) (map[string]interface{}, error)
+	GetCount(path string, params url.Values, ids []string) (int, error)
 }
 
 type dsClient struct {
@@ -65,6 +66,16 @@ func (c *dsClient) GetJSON(path string, params url.Values, ids []string) (map[st
 		panic(dat["description"].(string))
 	}
 	return dat, nil
+}
+
+func (c *dsClient) GetCount(path string, params url.Values, ids []string) (int, error) {
+	params.Set("entries", "false")
+	params.Set("count", "true")
+	dat, err := c.GetJSON(path, params, ids)
+	if err != nil {
+		return 0, err
+	}
+	return dat["totalResults"].(int), nil
 }
 
 func (c *dsClient) buildRequest(reqUrl string) (*http.Request, error) {
